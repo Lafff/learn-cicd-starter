@@ -31,29 +31,26 @@ func main() {
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Printf("warning: assuming default configuration. .env unreadable: %v", err)
-		port = "8080"
 	} else {
-		port = os.Getenv("PORT")
-		if port == "" {
-			log.Fatal("PORT environment variable is not set")
-		}
-		// https://github.com/libsql/libsql-client-go/#open-a-connection-to-sqld
-		// libsql://[your-database].turso.io?authToken=[your-auth-token]
-		dbURL := os.Getenv("DATABASE_URL")
-		if dbURL == "" {
-			log.Println("DATABASE_URL environment variable is not set")
-			log.Println("Running without CRUD endpoints")
-		} else {
-			db, err := sql.Open("libsql", dbURL)
-			if err != nil {
-				log.Fatal(err)
-			}
-			dbQueries := database.New(db)
-			apiCfg.DB = dbQueries
-			log.Println("Connected to database!")
-		}
+		port = "8080"
 	}
 
+	port = os.Getenv("PORT")
+	// https://github.com/libsql/libsql-client-go/#open-a-connection-to-sqld
+	// libsql://[your-database].turso.io?authToken=[your-auth-token]
+	dbURL := os.Getenv("DATABASE_URL")
+	if dbURL == "" {
+		log.Println("DATABASE_URL environment variable is not set")
+		log.Println("Running without CRUD endpoints")
+	} else {
+		db, err := sql.Open("libsql", dbURL)
+		if err != nil {
+			log.Fatal(err)
+		}
+		dbQueries := database.New(db)
+		apiCfg.DB = dbQueries
+		log.Println("Connected to database!")
+	}
 	router := chi.NewRouter()
 
 	router.Use(cors.Handler(cors.Options{
